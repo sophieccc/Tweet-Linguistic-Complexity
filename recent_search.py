@@ -35,7 +35,7 @@ def connect_to_endpoint(url, headers):
     return response.json()
 
 def get_queries():
-    file1 = open('politics.txt', 'r')
+    file1 = open('sports.txt', 'r')
     Lines = file1.readlines()
     queries = []
     for line in Lines:
@@ -43,15 +43,15 @@ def get_queries():
     return queries
 
 def main():
-    tweets = []
     bearer_token = auth()
     headers = create_headers(bearer_token)
     queries = get_queries()
     for query in queries:
+        tweets = []
         valid_token = True
         token = None
         count = 0
-        while valid_token and count < 2000:
+        while valid_token and count < 1500:
             url = create_url(token, query)
             json_response = connect_to_endpoint(url, headers)
             if json_response !=None:
@@ -70,6 +70,7 @@ def main():
                     print(query)
             else:
                 valid_token = False
+                print(query)
         if tweets:
             with open('tweets.json', 'a') as f:
                 json.dump(tweets,f)
