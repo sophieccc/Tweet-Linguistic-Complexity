@@ -1,5 +1,6 @@
 import json
 import re
+from autocorrect import Speller
 
 def write_unique_tweets(data):
     unique_tweets = {}
@@ -27,14 +28,22 @@ def remove_links(data):
         tweets[key] = re.sub(' {2,}', ' ', replaced)
     return tweets
 
+def correct_spelling(data):
+    spell = Speller(fast=True)
+    tweets = {}
+    for key, value in data:
+        tweets[key] = spell(value)
+    return tweets
+
 def main():
-    with open('sports_pre.json') as json_file:
+    with open('politics_pre.json') as json_file:
         data = json.load(json_file)
         #write_unique_tweets()
         tweets = remove_usernames_and_emojis(data)
         tweets2 = remove_links(tweets.items())
-        with open('sports.json', 'a') as f:
-            json.dump(tweets2,f)
+        tweets3 = correct_spelling(tweets2.items())
+        with open('politics.json', 'a') as f:
+            json.dump(tweets3,f)
 
 if __name__ == "__main__":
     main()
