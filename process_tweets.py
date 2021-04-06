@@ -52,18 +52,21 @@ def remove_hashtags(data):
         no_hashtags = value
         no_hashtags = re.sub(r'(#[a-zA-Z]*[\. ]*)+\Z', '', value)
         no_hash_symbols = re.sub('#', '', no_hashtags)
-        tweets[key] = " ".join(no_hash_symbols.split())
+        normal_spaces = " ".join(no_hash_symbols.split())
+        if (normal_spaces.endswith('.') or normal_spaces.endswith('!') or normal_spaces.endswith('?')) is not True:
+            normal_spaces += "."
+        tweets[key] = normal_spaces
     return tweets
 
 def main():
-    with open('sports_pre.json') as json_file:
+    with open('politics_pre.json') as json_file:
         data = json.load(json_file)
         # tweets3 = write_unique_tweets(data)
         tweets = remove_usernames_and_emojis(data)
         tweets2 = remove_links(tweets.items())
         tweets3 = correct_spelling(tweets2.items())
         tweets4 = remove_hashtags(tweets3.items())
-        with open('sports.json', 'a') as f:
+        with open('politics.json', 'a') as f:
             json.dump(tweets4,f)
 
 if __name__ == "__main__":
