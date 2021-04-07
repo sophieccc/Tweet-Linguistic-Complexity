@@ -58,7 +58,8 @@ def nltk_stuff():
 def main():
     with open('politics.json') as json_file:
         data = json.load(json_file)
-        get_lexicon_stats(data)
+        #get_lexicon_stats(data)
+        nltk_stuff()
 
 if __name__ == "__main__":
     main()
