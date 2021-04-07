@@ -1,5 +1,8 @@
+from itertools import takewhile
 import json
 from nltk import tokenize
+import nltk
+from nltk.tree import Tree
 import textstat
 from nltk.parse import CoreNLPParser, CoreNLPDependencyParser
 
@@ -37,29 +40,47 @@ def get_lexicon_stats(data):
         print("Number of unique words: {}".format(len(uniques)))
         print("Overall Type-token ratio: {}".format(len(uniques)/word_count))
 
-def nltk_stuff():
+def count_nodes(tree, count):
+    count +=1
+    for subtree in tree:
+        if type(subtree) == nltk.tree.Tree:
+            count = count_nodes(subtree, count)
+    return count
+
+def nltk_stuff(data):
     parser = CoreNLPParser(url='http://localhost:9000')
-    dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
+    num_nodes = 0
+    height = 0
+    n_items = dict(list(data.items())[0: 20])
+    for _, value in n_items.items():  
+        parsed = list(parser.parse(value.split())) 
+        height += parsed[0].height()
+        num_nodes += count_nodes(parsed[0], 0)
+    print("Num nodes: {}".format(num_nodes))
+    print("Avg nodes: {}".format(num_nodes / len(n_items.items())))
+    print("Avg height: {}".format(height / len(n_items.items())))
+    
+    # dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
+    # dep_parsed = dep_parser.parse('The quick brown fox jumps over the lazy dog.'.split())
+    # dep_results = [[(governor, dep, dependent) for governor, dep, dependent in parse.triples()] for parse in dep_parsed]
+    # print(dep_results)
 
-    dep_parsed = dep_parser.parse('The quick brown fox jumps over the lazy dog.'.split())
-    dep_results = [[(governor, dep, dependent) for governor, dep, dependent in parse.triples()] for parse in dep_parsed]
-    print(dep_results)
-
-    basic_parsed = list(parser.raw_parse('The quick brown fox jumps over the lazy dog.'))
-    print(basic_parsed)
-
-    tokenised = list(parser.tokenize('The quick brown fox jumps over the lazy dog.'))
-    print(tokenised)
-
+def position_stats(data):
     pos_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='pos')
-    pos = list(pos_tagger.tag('The quick brown fox jumps over the lazy dog.'.split()))
-    print(pos)
+    verb_count = 0
+    for _, value in data.items():
+        pos = list(pos_tagger.tag(value.split()))
+        for _,second in pos:
+            if second.startswith("V"):
+                verb_count +=1
+    print(verb_count)    
 
 def main():
-    with open('politics.json') as json_file:
+    with open('sports.json') as json_file:
         data = json.load(json_file)
+        #position_stats(data)
         #get_lexicon_stats(data)
-        nltk_stuff()
+        nltk_stuff(data)
 
 if __name__ == "__main__":
     main()
