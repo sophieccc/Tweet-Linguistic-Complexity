@@ -2,6 +2,7 @@ from itertools import takewhile
 import json
 from nltk import tokenize
 import nltk
+import random
 from nltk.tree import Tree
 import textstat
 from nltk.parse import CoreNLPParser, CoreNLPDependencyParser
@@ -31,6 +32,7 @@ def get_lexicon_stats(data):
         print("Number of tweets: {}".format(num_tweets))
         print("Syllables per tweet: {}".format(syllable_sum / num_tweets))
         print("Words per tweet: {}".format(word_sum / num_tweets))
+        print("Total sentences: {}".format(sentence_sum))
         print("Sentences per tweet: {}".format(sentence_sum / num_tweets))
         print("Syllables per word: {}".format(syllable_sum / word_sum))
         print("Words per sentence: {}".format(word_sum / sentence_sum))
@@ -51,21 +53,24 @@ def nltk_stuff(data):
     parser = CoreNLPParser(url='http://localhost:9000')
     num_nodes = 0
     height = 0
-    n_items = dict(list(data.items())[0: 20])
-    for _, value in n_items.items():  
-        parsed = list(parser.parse(value.split())) 
+    subset = dict(random.sample(data.items(), 5000))
+    get_lexicon_stats(subset)
+    print("\n")
+    for _, value in subset.items():  
+        parsed = list(parser.parse(value.split()))
         height += parsed[0].height()
         num_nodes += count_nodes(parsed[0], 0)
     print("Num nodes: {}".format(num_nodes))
-    print("Avg nodes: {}".format(num_nodes / len(n_items.items())))
-    print("Avg height: {}".format(height / len(n_items.items())))
+    print("Total height: {}".format(height))
+    print("Avg nodes for tweet: {}".format(num_nodes / len(subset.items())))
+    print("Avg height for tweet: {}".format(height / len(subset.items())))
     
     # dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
     # dep_parsed = dep_parser.parse('The quick brown fox jumps over the lazy dog.'.split())
     # dep_results = [[(governor, dep, dependent) for governor, dep, dependent in parse.triples()] for parse in dep_parsed]
     # print(dep_results)
 
-def position_stats(data):
+def verb_stats(data):
     pos_tagger = CoreNLPParser(url='http://localhost:9000', tagtype='pos')
     verb_count = 0
     for _, value in data.items():
