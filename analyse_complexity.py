@@ -108,7 +108,7 @@ def main():
         #position_stats(data)
         #get_lexicon_stats(data)
         #nltk_stuff(data)
-        top_words()
+        #top_words()
 
 if __name__ == "__main__":
     main()
