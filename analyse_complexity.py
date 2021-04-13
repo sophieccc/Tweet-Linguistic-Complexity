@@ -1,11 +1,12 @@
-from itertools import takewhile
 import json
 from nltk import tokenize
-import nltk
+from nltk.corpus import stopwords
 import random
 from nltk.tree import Tree
 import textstat
 from nltk.parse import CoreNLPParser, CoreNLPDependencyParser
+from collections import Counter
+import string
 
 def combine_tweets(data):
     file = open("pls.txt","w")
@@ -42,16 +43,19 @@ def get_lexicon_stats(data):
         print("Number of unique words: {}".format(len(uniques)))
         print("Overall Type-token ratio: {}".format(len(uniques)/word_count))
 
-def count_nodes(tree, count):
+def count_nodes(tree, count, num_s):
     count +=1
+    if tree.label().startswith("S"):
+        num_s +=1
     for subtree in tree:
-        if type(subtree) == nltk.tree.Tree:
-            count = count_nodes(subtree, count)
-    return count
+        if type(subtree) == Tree:
+            count, num_s = count_nodes(subtree, count, num_s)
+    return count, num_s
 
 def nltk_stuff(data):
     parser = CoreNLPParser(url='http://localhost:9000')
     num_nodes = 0
+    num_s = 0
     height = 0
     subset = dict(random.sample(data.items(), 5000))
     get_lexicon_stats(subset)
@@ -59,11 +63,14 @@ def nltk_stuff(data):
     for _, value in subset.items():  
         parsed = list(parser.parse(value.split()))
         height += parsed[0].height()
-        num_nodes += count_nodes(parsed[0], 0)
+        curr_num_nodes, curr_num_s = count_nodes(parsed[0][0], 0, 0)
+        num_nodes += curr_num_nodes
+        num_s += curr_num_s
+    print("Num clauses: {}".format(num_s))
     print("Num nodes: {}".format(num_nodes))
     print("Total height: {}".format(height))
-    print("Avg nodes for tweet: {}".format(num_nodes / len(subset.items())))
-    print("Avg height for tweet: {}".format(height / len(subset.items())))
+    print("Avg nodes per tweet: {}".format(num_nodes / len(subset.items())))
+    print("Avg height of tweet: {}".format(height / len(subset.items())))
     
     # dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
     # dep_parsed = dep_parser.parse('The quick brown fox jumps over the lazy dog.'.split())
@@ -80,12 +87,28 @@ def verb_stats(data):
                 verb_count +=1
     print(verb_count)    
 
+def top_words():
+    with open('politics_full.txt') as text:
+        words = tokenize.word_tokenize(text.read())
+        no_stopwords = [word for word in words if not (word in stopwords.words()) and not (word in string.punctuation)]
+        counter = Counter(no_stopwords)
+        total_frequency = sum(counter.values())
+        top_frequency = 0
+        for word in counter.most_common(50):
+            top_frequency += word[1]
+        print(total_frequency)
+        print(top_frequency)
+        print((top_frequency / total_frequency) * 100)
+        
+
+
 def main():
     with open('sports.json') as json_file:
         data = json.load(json_file)
         #position_stats(data)
         #get_lexicon_stats(data)
-        nltk_stuff(data)
+        #nltk_stuff(data)
+        top_words()
 
 if __name__ == "__main__":
     main()
