@@ -9,7 +9,7 @@ from collections import Counter
 import string
 
 def combine_tweets(data):
-    file = open("pls.txt","w")
+    file = open("test.txt","w")
     for _, value in data.items():
         file.write(value + " ")
 
@@ -30,6 +30,7 @@ def get_lexicon_stats(data):
             for token in tokens:
                 word_count +=1
                 uniques.add(token)  
+        print("Number of token: {}".format(len(uniques)))
         print("Number of tweets: {}".format(num_tweets))
         print("Syllables per tweet: {}".format(syllable_sum / num_tweets))
         print("Words per tweet: {}".format(word_sum / num_tweets))
@@ -88,7 +89,7 @@ def verb_stats(data):
     print(verb_count)    
 
 def top_words():
-    with open('politics_full.txt') as text:
+    with open('politics_combined.txt') as text:
         words = tokenize.word_tokenize(text.read())
         no_stopwords = [word for word in words if not (word in stopwords.words()) and not (word in string.punctuation)]
         counter = Counter(no_stopwords)
@@ -103,10 +104,10 @@ def top_words():
 
 
 def main():
-    with open('sports.json') as json_file:
+    with open('tweets/sports_final.json') as json_file:
         data = json.load(json_file)
         #position_stats(data)
-        #get_lexicon_stats(data)
+        get_lexicon_stats(data)
         #nltk_stuff(data)
         #top_words()
 

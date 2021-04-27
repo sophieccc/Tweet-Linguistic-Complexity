@@ -1,4 +1,3 @@
-
 .vscode/settings.json
 *.json
 *.txt
@@ -6,3 +5,5 @@ CORENLP/*
 .DS_Store
 *.conllu
 run_stanza.py
+Tables.numbers
+test.py
